@@ -13,7 +13,6 @@ import java.util.UUID;
 
 public final class PlayerOwner implements IMachineOwner {
 
-    @Getter
     private UUID playerUUID;
 
     public PlayerOwner() {}
