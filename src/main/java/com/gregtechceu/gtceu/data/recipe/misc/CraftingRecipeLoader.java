@@ -236,7 +236,8 @@ public class CraftingRecipeLoader {
         // Credits //
         ///////////////////////////////////////////////////
         VanillaRecipeHelper.addShapelessRecipe(provider, "coin_chocolate", COIN_CHOCOLATE.asStack(),
-                new UnificationEntry(dust, Cocoa), new UnificationEntry(foil, Gold), new FluidContainerIngredient(Milk.getFluidTag(), 1000),
+                new UnificationEntry(dust, Cocoa), new UnificationEntry(foil, Gold),
+                new FluidContainerIngredient(Milk.getFluidTag(), 1000),
                 new UnificationEntry(dust, Sugar));
         VanillaRecipeHelper.addShapelessRecipe(provider, "credit_copper", CREDIT_COPPER.asStack(8),
                 CREDIT_CUPRONICKEL.asStack());
