@@ -6,8 +6,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.UsernameCache;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
-import lombok.Getter;
-
 import java.util.List;
 import java.util.UUID;
 
