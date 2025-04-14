@@ -2,8 +2,10 @@ package com.gregtechceu.gtceu.integration.top.provider;
 
 import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.capability.GTCapabilityHelper;
-import com.gregtechceu.gtceu.api.capability.IEnergyContainer;
 
+import com.gregtechceu.gtceu.api.capability.IEnergyInfoProvider;
+import com.gregtechceu.gtceu.integration.top.element.ProgressElement;
+import com.gregtechceu.gtceu.utils.FormattingUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -17,7 +19,11 @@ import mcjty.theoneprobe.api.IProbeInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ElectricContainerInfoProvider extends CapabilityInfoProvider<IEnergyContainer> {
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.MathContext;
+
+public class ElectricContainerInfoProvider extends CapabilityInfoProvider<IEnergyInfoProvider> {
 
     @Override
     public ResourceLocation getID() {
@@ -26,24 +32,65 @@ public class ElectricContainerInfoProvider extends CapabilityInfoProvider<IEnerg
 
     @Nullable
     @Override
-    protected IEnergyContainer getCapability(Level level, BlockPos pos, @Nullable Direction side) {
-        return GTCapabilityHelper.getEnergyContainer(level, pos, side);
+    protected IEnergyInfoProvider getCapability(Level level, BlockPos pos, @Nullable Direction side) {
+        return GTCapabilityHelper.getEnergyInfoProvider(level, pos, side);
     }
 
     @Override
-    protected void addProbeInfo(IEnergyContainer capability, IProbeInfo probeInfo, Player player,
+    protected void addProbeInfo(IEnergyInfoProvider capability, IProbeInfo probeInfo, Player player,
                                 BlockEntity blockEntity, IProbeHitData data) {
-        long maxStorage = capability.getEnergyCapacity();
-        if (maxStorage == 0) return; // do not add empty max storage progress bar
-        probeInfo.progress(capability.getEnergyStored(), maxStorage, probeInfo.defaultProgressStyle()
-                .suffix(Component.translatable("gtceu.top.energy_stored", maxStorage))
-                .filledColor(0xFFEEE600)
-                .alternateFilledColor(0xFFEEE600)
-                .borderColor(0xFF555555));
+        var supportBigInteger = capability.supportsBigIntEnergyValues();
+        var energyInfo = capability.getEnergyInfo();
+
+        String energyStr;
+        String maxEnergyStr;
+        float progress;
+
+        if (supportBigInteger) {
+            if (energyInfo.capacity().compareTo(BigInteger.ZERO) <= 0) return;
+            boolean sicFormatStored = energyInfo.stored().compareTo(BigInteger.valueOf((long) 1e12)) > 0;
+            boolean sicFormatMax = energyInfo.capacity().compareTo(BigInteger.valueOf((long) 1e12)) > 0;
+            energyStr = sicFormatStored
+                    ? FormattingUtil.DECIMAL_FORMAT_SIC.format(energyInfo.stored())
+                    : FormattingUtil.formatNumbers(energyInfo.stored());
+            maxEnergyStr = sicFormatMax
+                    ? FormattingUtil.DECIMAL_FORMAT_SIC.format(energyInfo.capacity())
+                    : FormattingUtil.formatNumbers(energyInfo.capacity());
+            progress = getProgress(energyInfo.stored(), energyInfo.capacity());
+        } else {
+            if (energyInfo.capacity().longValue() == 0) return;
+            boolean sicFormatStored = energyInfo.stored().longValue() > 1e12;
+            boolean sicFormatMax = energyInfo.capacity().longValue() > 1e12;
+            energyStr = sicFormatStored
+                    ? FormattingUtil.DECIMAL_FORMAT_SIC.format(energyInfo.stored().longValue())
+                    : FormattingUtil.formatNumbers(energyInfo.stored().longValue());
+            maxEnergyStr = sicFormatMax
+                    ? FormattingUtil.DECIMAL_FORMAT_SIC.format(energyInfo.capacity().longValue())
+                    : FormattingUtil.formatNumbers(energyInfo.capacity().longValue());
+            progress = getProgress(energyInfo.stored().longValue(), energyInfo.capacity().longValue());
+        }
+
+        probeInfo.element(new ProgressElement(
+                progress,
+                Component.translatable("gtceu.jade.energy_stored", energyStr, maxEnergyStr),
+                probeInfo.defaultProgressStyle()
+                        .filledColor(0xFFEEE600)
+                        .alternateFilledColor(0xFFEEE600)
+                        .borderColor(0xFF555555))
+        );
+    }
+
+    protected float getProgress(long progress, long maxProgress) {
+        return maxProgress == 0 ? 0 : (float) ((double) progress / maxProgress);
+    }
+
+    protected float getProgress(BigInteger progress, BigInteger maxProgress) {
+        if (maxProgress.equals(BigInteger.ZERO)) return 0;
+        return new BigDecimal(progress).divide(new BigDecimal(maxProgress), MathContext.DECIMAL32).floatValue();
     }
 
     @Override
-    protected boolean allowDisplaying(@NotNull IEnergyContainer capability) {
+    protected boolean allowDisplaying(@NotNull IEnergyInfoProvider capability) {
         return !capability.isOneProbeHidden();
     }
 }

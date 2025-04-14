@@ -9,4 +9,13 @@ public interface IEnergyInfoProvider {
     EnergyInfo getEnergyInfo();
 
     boolean supportsBigIntEnergyValues();
+
+    /**
+     * @return true if information like energy capacity should be hidden from TOP.
+     *         Useful for cables
+     */
+    default boolean isOneProbeHidden() {
+        return false;
+    }
+
 }

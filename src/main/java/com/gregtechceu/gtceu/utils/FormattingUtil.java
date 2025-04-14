@@ -223,6 +223,10 @@ public class FormattingUtil {
         return sb.toString();
     }
 
+    public static String formatNumberSic() {
+        return "";
+    }
+
     public static String formatBuckets(long mB) {
         return formatNumberReadable(mB, true, DECIMAL_FORMAT_2F, "B");
     }
