@@ -244,10 +244,9 @@ public class FormattingUtil {
             }
         }
 
-        return shouldSicFormat
-                ? DECIMAL_FORMAT_SIC_2F.format(number)
-                : formatNumbers(number);
+        return shouldSicFormat ? DECIMAL_FORMAT_SIC_2F.format(number) : formatNumbers(number);
     }
+
     public static String formatBuckets(long mB) {
         return formatNumberReadable(mB, true, DECIMAL_FORMAT_2F, "B");
     }

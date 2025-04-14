@@ -1,8 +1,7 @@
 package com.gregtechceu.gtceu.integration.top.element;
 
 import com.gregtechceu.gtceu.GTCEu;
-import mcjty.theoneprobe.api.*;
-import mcjty.theoneprobe.apiimpl.styles.ProgressStyle;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -10,6 +9,9 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+
+import mcjty.theoneprobe.api.*;
+import mcjty.theoneprobe.apiimpl.styles.ProgressStyle;
 import org.jetbrains.annotations.Nullable;
 
 public class ProgressElement implements IElement {

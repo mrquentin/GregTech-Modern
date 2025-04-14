@@ -34,7 +34,6 @@ public class TheOneProbePlugin {
         });
         oneProbe.registerElementFactory(new ProgressElement.Factory());
 
-
         oneProbe.registerProvider(new ElectricContainerInfoProvider());
         // oneProbe.registerProvider(new FuelableInfoProvider());
         oneProbe.registerProvider(new WorkableInfoProvider());

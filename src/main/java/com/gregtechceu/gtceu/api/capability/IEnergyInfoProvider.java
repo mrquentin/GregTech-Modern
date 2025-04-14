@@ -17,5 +17,4 @@ public interface IEnergyInfoProvider {
     default boolean isOneProbeHidden() {
         return false;
     }
-
 }

@@ -4,15 +4,16 @@ import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.capability.GTCapabilityHelper;
 import com.gregtechceu.gtceu.api.capability.IEnergyInfoProvider;
 import com.gregtechceu.gtceu.utils.FormattingUtil;
+
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+
 import org.jetbrains.annotations.Nullable;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.ITooltip;
@@ -23,7 +24,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 
-public class ElectricContainerBlockProvider extends CapabilityBlockProvider<IEnergyInfoProvider>{
+public class ElectricContainerBlockProvider extends CapabilityBlockProvider<IEnergyInfoProvider> {
 
     public ElectricContainerBlockProvider() {
         super(GTCEu.id("electric_container_provider"));
@@ -51,7 +52,8 @@ public class ElectricContainerBlockProvider extends CapabilityBlockProvider<IEne
     }
 
     @Override
-    protected void addTooltip(CompoundTag capData, ITooltip tooltip, Player player, BlockAccessor block, BlockEntity blockEntity, IPluginConfig config) {
+    protected void addTooltip(CompoundTag capData, ITooltip tooltip, Player player, BlockAccessor block,
+                              BlockEntity blockEntity, IPluginConfig config) {
         var supportBigIntegers = capData.getBoolean("SupportBigIntegers");
 
         String energyStr;
@@ -82,9 +84,7 @@ public class ElectricContainerBlockProvider extends CapabilityBlockProvider<IEne
                         Component.translatable("gtceu.jade.energy_stored", energyStr, maxEnergyStr),
                         helper.progressStyle().color(0xFFEEE600, 0xFFEEE600).textColor(-1),
                         Util.make(BoxStyle.DEFAULT, style -> style.borderColor = 0xFF555555),
-                        true
-                )
-        );
+                        true));
     }
 
     @Override
