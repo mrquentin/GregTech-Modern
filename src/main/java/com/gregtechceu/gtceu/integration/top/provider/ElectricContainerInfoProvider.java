@@ -48,25 +48,13 @@ public class ElectricContainerInfoProvider extends CapabilityInfoProvider<IEnerg
 
         if (supportBigInteger) {
             if (energyInfo.capacity().compareTo(BigInteger.ZERO) <= 0) return;
-            boolean sicFormatStored = energyInfo.stored().compareTo(BigInteger.valueOf((long) 1e12)) > 0;
-            boolean sicFormatMax = energyInfo.capacity().compareTo(BigInteger.valueOf((long) 1e12)) > 0;
-            energyStr = sicFormatStored
-                    ? FormattingUtil.DECIMAL_FORMAT_SIC.format(energyInfo.stored())
-                    : FormattingUtil.formatNumbers(energyInfo.stored());
-            maxEnergyStr = sicFormatMax
-                    ? FormattingUtil.DECIMAL_FORMAT_SIC.format(energyInfo.capacity())
-                    : FormattingUtil.formatNumbers(energyInfo.capacity());
+            energyStr = FormattingUtil.formatNumberOrSic(energyInfo.stored(), 1e12);
+            maxEnergyStr = FormattingUtil.formatNumberOrSic(energyInfo.capacity(), 1e12);
             progress = getProgress(energyInfo.stored(), energyInfo.capacity());
         } else {
             if (energyInfo.capacity().longValue() == 0) return;
-            boolean sicFormatStored = energyInfo.stored().longValue() > 1e12;
-            boolean sicFormatMax = energyInfo.capacity().longValue() > 1e12;
-            energyStr = sicFormatStored
-                    ? FormattingUtil.DECIMAL_FORMAT_SIC.format(energyInfo.stored().longValue())
-                    : FormattingUtil.formatNumbers(energyInfo.stored().longValue());
-            maxEnergyStr = sicFormatMax
-                    ? FormattingUtil.DECIMAL_FORMAT_SIC.format(energyInfo.capacity().longValue())
-                    : FormattingUtil.formatNumbers(energyInfo.capacity().longValue());
+            energyStr = FormattingUtil.formatNumberOrSic(energyInfo.stored().longValue(), 1e12);
+            maxEnergyStr = FormattingUtil.formatNumberOrSic(energyInfo.capacity().longValue(), 1e12);
             progress = getProgress(energyInfo.stored().longValue(), energyInfo.capacity().longValue());
         }
 

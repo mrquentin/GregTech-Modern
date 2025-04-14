@@ -62,15 +62,15 @@ public class ElectricContainerBlockProvider extends CapabilityBlockProvider<IEne
             var energy = new BigInteger(capData.getByteArray("Energy"));
             var maxEnergy = new BigInteger(capData.getByteArray("MaxEnergy"));
             if (maxEnergy.compareTo(BigInteger.ZERO) <= 0) return;
-            energyStr = FormattingUtil.formatNumbers(energy);
-            maxEnergyStr = FormattingUtil.formatNumbers(maxEnergy);
+            energyStr = FormattingUtil.formatNumberOrSic(energy, 1e12);
+            maxEnergyStr = FormattingUtil.formatNumberOrSic(maxEnergy, 1e12);
             progress = getProgress(energy, maxEnergy);
         } else {
             var energy = capData.getLong("Energy");
             var maxEnergy = capData.getLong("MaxEnergy");
             if (maxEnergy == 0) return;
-            energyStr = FormattingUtil.formatNumbers(energy);
-            maxEnergyStr = FormattingUtil.formatNumbers(maxEnergy);
+            energyStr = FormattingUtil.formatNumberOrSic(energy, 1e12);
+            maxEnergyStr = FormattingUtil.formatNumberOrSic(maxEnergy, 1e12);
             progress = getProgress(energy, maxEnergy);
         }
 

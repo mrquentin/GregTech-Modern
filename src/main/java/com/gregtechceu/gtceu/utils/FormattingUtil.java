@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Arrays;
@@ -30,6 +31,7 @@ public class FormattingUtil {
     public static final DecimalFormat DECIMAL_FORMAT_1F = new DecimalFormat("#,##0.#");
     public static final DecimalFormat DECIMAL_FORMAT_2F = new DecimalFormat("#,##0.##");
     public static final DecimalFormat DECIMAL_FORMAT_SIC = new DecimalFormat("0E00");
+    public static final DecimalFormat DECIMAL_FORMAT_SIC_2F = new DecimalFormat("0.00E00");
 
     private static final int SMALL_DOWN_NUMBER_BASE = '\u2080';
     private static final int SMALL_UP_NUMBER_BASE = '\u2070';
@@ -223,10 +225,29 @@ public class FormattingUtil {
         return sb.toString();
     }
 
-    public static String formatNumberSic() {
-        return "";
-    }
+    public static String formatNumberOrSic(Number number, Number threshold) {
+        boolean shouldSicFormat;
 
+        if (number instanceof BigInteger bigInteger) {
+            if (threshold instanceof BigInteger bigIntegerThreshold) {
+                shouldSicFormat = bigInteger.compareTo(bigIntegerThreshold) > 0;
+            } else {
+                shouldSicFormat = bigInteger.compareTo(BigInteger.valueOf(threshold.longValue())) > 0;
+            }
+        } else {
+            double numberValue = number.doubleValue();
+            if (threshold instanceof BigInteger bigIntegerThreshold) {
+                shouldSicFormat = (BigInteger.valueOf((long) numberValue)).compareTo(bigIntegerThreshold) > 0;
+            } else {
+                double thresholdValue = threshold.doubleValue();
+                shouldSicFormat = numberValue > thresholdValue;
+            }
+        }
+
+        return shouldSicFormat
+                ? DECIMAL_FORMAT_SIC_2F.format(number)
+                : formatNumbers(number);
+    }
     public static String formatBuckets(long mB) {
         return formatNumberReadable(mB, true, DECIMAL_FORMAT_2F, "B");
     }
