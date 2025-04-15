@@ -28,7 +28,7 @@ public class ProgressRender {
                 }
             }
         }
-        renderText(guiGraphics, x, y, width, text, style);
+        renderText(guiGraphics, x, y + 1, width, text, style);
     }
 
     public static void renderText(GuiGraphics graphics, int x, int y, int w, Component text, IProgressStyle style) {
