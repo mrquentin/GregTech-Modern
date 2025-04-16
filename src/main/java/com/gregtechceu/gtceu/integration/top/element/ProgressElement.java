@@ -2,7 +2,6 @@ package com.gregtechceu.gtceu.integration.top.element;
 
 import com.gregtechceu.gtceu.GTCEu;
 
-import mcjty.theoneprobe.rendering.RenderHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -13,6 +12,7 @@ import net.minecraft.util.Mth;
 
 import mcjty.theoneprobe.api.*;
 import mcjty.theoneprobe.apiimpl.styles.ProgressStyle;
+import mcjty.theoneprobe.rendering.RenderHelper;
 import org.jetbrains.annotations.Nullable;
 
 public class ProgressElement implements IElement {
@@ -69,8 +69,10 @@ public class ProgressElement implements IElement {
             Font render = mc.font;
             int textWidth = render.width(text.getVisualOrderText());
             switch (style.getAlignment()) {
-                case ALIGN_BOTTOMRIGHT -> RenderHelper.renderText(mc, guiGraphics, (x + getWidth() - 3) - textWidth, y + 2, text);
-                case ALIGN_CENTER -> RenderHelper.renderText(mc, guiGraphics, (x + (getWidth() / 2)) - (textWidth / 2), y + 2,
+                case ALIGN_BOTTOMRIGHT -> RenderHelper.renderText(mc, guiGraphics, (x + getWidth() - 3) - textWidth,
+                        y + 2, text);
+                case ALIGN_CENTER -> RenderHelper.renderText(mc, guiGraphics, (x + (getWidth() / 2)) - (textWidth / 2),
+                        y + 2,
                         text);
                 case ALIGN_TOPLEFT -> RenderHelper.renderText(mc, guiGraphics, x + 3, y + 2, text);
             }

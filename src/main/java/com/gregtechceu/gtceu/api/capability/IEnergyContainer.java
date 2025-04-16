@@ -124,7 +124,6 @@ public interface IEnergyContainer extends IEnergyInfoProvider {
         return 0L;
     }
 
-
     IEnergyContainer DEFAULT = new IEnergyContainer() {
 
         @Override
