@@ -44,7 +44,7 @@ public class ElectricContainerBlockProvider extends CapabilityBlockProvider<IEne
     @Override
     protected void addTooltip(CompoundTag capData, ITooltip tooltip, Player player, BlockAccessor block,
                               BlockEntity blockEntity, IPluginConfig config) {
-        if (capData.isEmpty()) return;
+        if (!capData.contains("Energy") && !capData.contains("MaxEnergy")) return;
 
         var energy = new BigInteger(capData.getByteArray("Energy"));
         var maxEnergy = new BigInteger(capData.getByteArray("MaxEnergy"));
