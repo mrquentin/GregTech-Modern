@@ -10,6 +10,7 @@ import com.gregtechceu.gtceu.api.gui.widget.LongInputWidget;
 import com.gregtechceu.gtceu.api.gui.widget.ToggleButtonWidget;
 import com.gregtechceu.gtceu.utils.GTMath;
 
+import com.gregtechceu.gtceu.utils.MathUtils;
 import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
 import com.lowdragmc.lowdraglib.gui.widget.TextBoxWidget;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
@@ -24,6 +25,7 @@ import net.minecraft.core.Direction;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -49,6 +51,7 @@ public class AdvancedEnergyDetectorCover extends EnergyDetectorCover implements 
     @Getter
     @Setter
     public long minValue, maxValue;
+
     @Persisted
     @Getter
     private boolean usePercent;
@@ -68,23 +71,22 @@ public class AdvancedEnergyDetectorCover extends EnergyDetectorCover implements 
         if (coverHolder.getOffsetTimer() % 20 != 0) return;
 
         IEnergyInfoProvider energyInfoProvider = getEnergyInfoProvider();
-
-        if (energyInfoProvider == null) {
-            return;
-        }
+        if (energyInfoProvider == null) return;
 
         // TODO properly support values > MAX_LONG
-        IEnergyInfoProvider.EnergyInfo energyInfo = energyInfoProvider.getEnergyInfo();
-        long capacity = energyInfo.capacity().longValue();
-        long stored = energyInfo.stored().longValue();
+        var energyInfo = energyInfoProvider.getEnergyInfo();
+        var isBigInt = energyInfoProvider.supportsBigIntEnergyValues();
+
+        Number capacity = isBigInt ? energyInfo.capacity() : energyInfo.capacity().longValue();
+        Number stored = isBigInt ? energyInfo.stored() : energyInfo.stored().longValue();
 
         if (usePercent) {
-            if (capacity > 0) {
-                float ratio = (float) stored / capacity;
+            if (MathUtils.compare(capacity, 0) > 0) {
+                var ratio = MathUtils.ratio(capacity, stored);
                 setRedstoneSignalOutput(computeLatchedRedstoneBetweenValues(ratio * 100, maxValue,
                         minValue, isInverted(), redstoneSignalOutput));
             } else {
-                setRedstoneSignalOutput(isInverted() ? 0 : 15);
+                setRedstoneSignalOutput(isInverted() ? 15 : 0);
             }
         } else {
             setRedstoneSignalOutput(computeLatchedRedstoneBetweenValues(stored, this.maxValue, this.minValue,
