@@ -231,12 +231,6 @@ public class FormattingUtil {
                 : formatNumbers(number);
     }
 
-    public static String formatNumberOrSic(long number, long threshold) {
-        return number > threshold
-                ? DECIMAL_FORMAT_SIC_2F.format(number)
-                : formatNumbers(number);
-    }
-
     public static String formatBuckets(long mB) {
         return formatNumberReadable(mB, true, DECIMAL_FORMAT_2F, "B");
     }
