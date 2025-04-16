@@ -226,9 +226,7 @@ public class FormattingUtil {
     }
 
     public static String formatNumberOrSic(BigInteger number, BigInteger threshold) {
-        return number.compareTo(threshold) > 0
-                ? DECIMAL_FORMAT_SIC_2F.format(number)
-                : formatNumbers(number);
+        return number.compareTo(threshold) > 0 ? DECIMAL_FORMAT_SIC_2F.format(number) : formatNumbers(number);
     }
 
     public static String formatBuckets(long mB) {
