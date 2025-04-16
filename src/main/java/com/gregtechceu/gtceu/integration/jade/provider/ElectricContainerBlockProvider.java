@@ -75,7 +75,7 @@ public class ElectricContainerBlockProvider extends CapabilityBlockProvider<IEne
     }
 
     protected float getProgress(BigInteger progress, BigInteger maxProgress) {
-        if (maxProgress.equals(BigInteger.ZERO)) return 0;
+        if (maxProgress.compareTo(BigInteger.ZERO) <= 0) return 0;
         return new BigDecimal(progress).divide(new BigDecimal(maxProgress), MathContext.DECIMAL32).floatValue();
     }
 }
