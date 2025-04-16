@@ -41,13 +41,12 @@ public class ElectricContainerBlockProvider extends CapabilityBlockProvider<IEne
         data.putBoolean("SupportBigIntegers", supportBigIntegers);
 
         var energyInfo = capability.getEnergyInfo();
-        if (!supportBigIntegers) {
-            data.putLong("Energy", energyInfo.stored().longValue());
-            data.putLong("MaxEnergy", energyInfo.capacity().longValue());
-        } else {
-
+        if (supportBigIntegers) {
             data.putByteArray("Energy", energyInfo.stored().toByteArray());
             data.putByteArray("MaxEnergy", energyInfo.capacity().toByteArray());
+        } else {
+            data.putLong("Energy", energyInfo.stored().longValue());
+            data.putLong("MaxEnergy", energyInfo.capacity().longValue());
         }
     }
 

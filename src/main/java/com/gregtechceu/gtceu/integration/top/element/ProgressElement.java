@@ -2,6 +2,7 @@ package com.gregtechceu.gtceu.integration.top.element;
 
 import com.gregtechceu.gtceu.GTCEu;
 
+import mcjty.theoneprobe.rendering.RenderHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -47,7 +48,33 @@ public class ProgressElement implements IElement {
 
     @Override
     public void render(GuiGraphics guiGraphics, int x, int y) {
-        ProgressRender.render(guiGraphics, this.style, x, y, getWidth(), getHeight(), this.progress, this.text);
+        RenderHelper.drawThickBeveledBox(guiGraphics, x, y, x + getWidth(), y + getHeight(), 1, style.getBorderColor(),
+                style.getBorderColor(), style.getBackgroundColor());
+        if (progress > 0.0F) {
+            var dx = (int) Math.min(progress * (getWidth() - 2), getWidth() - 2);
+            if (style.getFilledColor() == style.getAlternatefilledColor()) {
+                if (dx > 0) {
+                    RenderHelper.drawThickBeveledBox(guiGraphics, x + 1, y + 1, x + dx + 1, y + getHeight() - 1, 1,
+                            style.getFilledColor(), style.getFilledColor(), style.getFilledColor());
+                }
+            } else {
+                for (int xx = 0; xx < x + dx; xx++) {
+                    int color = (xx & 1) == 0 ? style.getFilledColor() : style.getAlternatefilledColor();
+                    RenderHelper.drawVerticalLine(guiGraphics, xx, y + 1, y + getHeight() - 1, color);
+                }
+            }
+        }
+        if (style.isShowText()) {
+            Minecraft mc = Minecraft.getInstance();
+            Font render = mc.font;
+            int textWidth = render.width(text.getVisualOrderText());
+            switch (style.getAlignment()) {
+                case ALIGN_BOTTOMRIGHT -> RenderHelper.renderText(mc, guiGraphics, (x + getWidth() - 3) - textWidth, y + 2, text);
+                case ALIGN_CENTER -> RenderHelper.renderText(mc, guiGraphics, (x + (getWidth() / 2)) - (textWidth / 2), y + 2,
+                        text);
+                case ALIGN_TOPLEFT -> RenderHelper.renderText(mc, guiGraphics, x + 3, y + 2, text);
+            }
+        }
     }
 
     @Override
