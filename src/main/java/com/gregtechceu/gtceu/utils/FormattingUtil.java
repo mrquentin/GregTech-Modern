@@ -226,13 +226,15 @@ public class FormattingUtil {
     }
 
     public static String formatNumberOrSic(BigInteger number, BigInteger threshold) {
-        boolean shouldSicFormat = number.compareTo(threshold) > 0;
-        return shouldSicFormat ? DECIMAL_FORMAT_SIC_2F.format(number) : formatNumbers(number);
+        return number.compareTo(threshold) > 0
+                ? DECIMAL_FORMAT_SIC_2F.format(number)
+                : formatNumbers(number);
     }
 
     public static String formatNumberOrSic(long number, long threshold) {
-        boolean shouldSicFormat = number > threshold;
-        return shouldSicFormat ? DECIMAL_FORMAT_SIC_2F.format(number) : formatNumbers(number);
+        return number > threshold
+                ? DECIMAL_FORMAT_SIC_2F.format(number)
+                : formatNumbers(number);
     }
 
     public static String formatBuckets(long mB) {
