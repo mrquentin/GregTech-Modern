@@ -37,44 +37,22 @@ public class ElectricContainerBlockProvider extends CapabilityBlockProvider<IEne
 
     @Override
     protected void write(CompoundTag data, IEnergyInfoProvider capability) {
-        var supportBigIntegers = capability.supportsBigIntEnergyValues();
-        data.putBoolean("SupportBigIntegers", supportBigIntegers);
-
-        var energyInfo = capability.getEnergyInfo();
-        if (supportBigIntegers) {
-            data.putByteArray("Energy", energyInfo.stored().toByteArray());
-            data.putByteArray("MaxEnergy", energyInfo.capacity().toByteArray());
-        } else {
-            data.putLong("Energy", energyInfo.stored().longValue());
-            data.putLong("MaxEnergy", energyInfo.capacity().longValue());
-        }
+        data.putByteArray("Energy", capability.getEnergyInfo().stored().toByteArray());
+        data.putByteArray("MaxEnergy", capability.getEnergyInfo().capacity().toByteArray());
     }
 
     @Override
     protected void addTooltip(CompoundTag capData, ITooltip tooltip, Player player, BlockAccessor block,
                               BlockEntity blockEntity, IPluginConfig config) {
-        var supportBigIntegers = capData.getBoolean("SupportBigIntegers");
+        if (capData.isEmpty()) return;
 
-        String energyStr;
-        String maxEnergyStr;
-        float progress;
-
-        if (supportBigIntegers) {
-            var energy = new BigInteger(capData.getByteArray("Energy"));
-            var maxEnergy = new BigInteger(capData.getByteArray("MaxEnergy"));
-            if (maxEnergy.compareTo(BigInteger.ZERO) <= 0) return;
-            var threshold = BigInteger.valueOf((long) 1e12);
-            energyStr = FormattingUtil.formatNumberOrSic(energy, threshold);
-            maxEnergyStr = FormattingUtil.formatNumberOrSic(maxEnergy, threshold);
-            progress = getProgress(energy, maxEnergy);
-        } else {
-            var energy = capData.getLong("Energy");
-            var maxEnergy = capData.getLong("MaxEnergy");
-            if (maxEnergy == 0) return;
-            energyStr = FormattingUtil.formatNumberOrSic(energy, (long) 1e12);
-            maxEnergyStr = FormattingUtil.formatNumberOrSic(maxEnergy, (long) 1e12);
-            progress = getProgress(energy, maxEnergy);
-        }
+        var energy = new BigInteger(capData.getByteArray("Energy"));
+        var maxEnergy = new BigInteger(capData.getByteArray("MaxEnergy"));
+        if (maxEnergy.compareTo(BigInteger.ZERO) <= 0) return;
+        var threshold = BigInteger.valueOf((long) 1e12);
+        var energyStr = FormattingUtil.formatNumberOrSic(energy, threshold);
+        var maxEnergyStr = FormattingUtil.formatNumberOrSic(maxEnergy, threshold);
+        var progress = getProgress(energy, maxEnergy);
 
         var helper = tooltip.getElementHelper();
 

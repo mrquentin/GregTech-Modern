@@ -39,25 +39,13 @@ public class ElectricContainerInfoProvider extends CapabilityInfoProvider<IEnerg
     @Override
     protected void addProbeInfo(IEnergyInfoProvider capability, IProbeInfo probeInfo, Player player,
                                 BlockEntity blockEntity, IProbeHitData data) {
-        var supportBigInteger = capability.supportsBigIntEnergyValues();
+
         var energyInfo = capability.getEnergyInfo();
-
-        String energyStr;
-        String maxEnergyStr;
-        float progress;
-
-        if (supportBigInteger) {
-            if (energyInfo.capacity().compareTo(BigInteger.ZERO) <= 0) return;
-            var threshold = BigInteger.valueOf((long) 1e12);
-            energyStr = FormattingUtil.formatNumberOrSic(energyInfo.stored(), threshold);
-            maxEnergyStr = FormattingUtil.formatNumberOrSic(energyInfo.capacity(), threshold);
-            progress = getProgress(energyInfo.stored(), energyInfo.capacity());
-        } else {
-            if (energyInfo.capacity().longValue() == 0) return;
-            energyStr = FormattingUtil.formatNumberOrSic(energyInfo.stored().longValue(), (long) 1e12);
-            maxEnergyStr = FormattingUtil.formatNumberOrSic(energyInfo.capacity().longValue(), (long) 1e12);
-            progress = getProgress(energyInfo.stored().longValue(), energyInfo.capacity().longValue());
-        }
+        if (energyInfo.capacity().compareTo(BigInteger.ZERO) <= 0) return;
+        var threshold = BigInteger.valueOf((long) 1e12);
+        var energyStr = FormattingUtil.formatNumberOrSic(energyInfo.stored(), threshold);
+        var maxEnergyStr = FormattingUtil.formatNumberOrSic(energyInfo.capacity(), threshold);
+        var progress = getProgress(energyInfo.stored(), energyInfo.capacity());
 
         probeInfo.element(new ProgressElement(
                 progress,

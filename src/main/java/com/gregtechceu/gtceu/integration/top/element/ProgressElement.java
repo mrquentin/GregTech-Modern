@@ -70,11 +70,11 @@ public class ProgressElement implements IElement {
             int textWidth = render.width(text.getVisualOrderText());
             switch (style.getAlignment()) {
                 case ALIGN_BOTTOMRIGHT -> RenderHelper.renderText(mc, guiGraphics, (x + getWidth() - 3) - textWidth,
-                        y + 2, text);
+                        y + 3, text);
                 case ALIGN_CENTER -> RenderHelper.renderText(mc, guiGraphics, (x + (getWidth() / 2)) - (textWidth / 2),
-                        y + 2,
+                        y + 3,
                         text);
-                case ALIGN_TOPLEFT -> RenderHelper.renderText(mc, guiGraphics, x + 3, y + 2, text);
+                case ALIGN_TOPLEFT -> RenderHelper.renderText(mc, guiGraphics, x + 3, y + 3, text);
             }
         }
     }
