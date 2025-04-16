@@ -225,25 +225,13 @@ public class FormattingUtil {
         return sb.toString();
     }
 
-    public static String formatNumberOrSic(Number number, Number threshold) {
-        boolean shouldSicFormat;
+    public static String formatNumberOrSic(BigInteger number, BigInteger threshold) {
+        boolean shouldSicFormat = number.compareTo(threshold) > 0;
+        return shouldSicFormat ? DECIMAL_FORMAT_SIC_2F.format(number) : formatNumbers(number);
+    }
 
-        if (number instanceof BigInteger bigInteger) {
-            if (threshold instanceof BigInteger bigIntegerThreshold) {
-                shouldSicFormat = bigInteger.compareTo(bigIntegerThreshold) > 0;
-            } else {
-                shouldSicFormat = bigInteger.compareTo(BigInteger.valueOf(threshold.longValue())) > 0;
-            }
-        } else {
-            double numberValue = number.doubleValue();
-            if (threshold instanceof BigInteger bigIntegerThreshold) {
-                shouldSicFormat = (BigInteger.valueOf((long) numberValue)).compareTo(bigIntegerThreshold) > 0;
-            } else {
-                double thresholdValue = threshold.doubleValue();
-                shouldSicFormat = numberValue > thresholdValue;
-            }
-        }
-
+    public static String formatNumberOrSic(long number, long threshold) {
+        boolean shouldSicFormat = number > threshold;
         return shouldSicFormat ? DECIMAL_FORMAT_SIC_2F.format(number) : formatNumbers(number);
     }
 

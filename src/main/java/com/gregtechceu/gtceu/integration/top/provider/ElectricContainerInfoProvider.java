@@ -48,13 +48,14 @@ public class ElectricContainerInfoProvider extends CapabilityInfoProvider<IEnerg
 
         if (supportBigInteger) {
             if (energyInfo.capacity().compareTo(BigInteger.ZERO) <= 0) return;
-            energyStr = FormattingUtil.formatNumberOrSic(energyInfo.stored(), 1e12);
-            maxEnergyStr = FormattingUtil.formatNumberOrSic(energyInfo.capacity(), 1e12);
+            var threshold = BigInteger.valueOf((long) 1e12);
+            energyStr = FormattingUtil.formatNumberOrSic(energyInfo.stored(), threshold);
+            maxEnergyStr = FormattingUtil.formatNumberOrSic(energyInfo.capacity(), threshold);
             progress = getProgress(energyInfo.stored(), energyInfo.capacity());
         } else {
             if (energyInfo.capacity().longValue() == 0) return;
-            energyStr = FormattingUtil.formatNumberOrSic(energyInfo.stored().longValue(), 1e12);
-            maxEnergyStr = FormattingUtil.formatNumberOrSic(energyInfo.capacity().longValue(), 1e12);
+            energyStr = FormattingUtil.formatNumberOrSic(energyInfo.stored().longValue(), (long) 1e12);
+            maxEnergyStr = FormattingUtil.formatNumberOrSic(energyInfo.capacity().longValue(), (long) 1e12);
             progress = getProgress(energyInfo.stored().longValue(), energyInfo.capacity().longValue());
         }
 
