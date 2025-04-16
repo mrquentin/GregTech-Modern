@@ -39,7 +39,6 @@ public class ElectricContainerInfoProvider extends CapabilityInfoProvider<IEnerg
     @Override
     protected void addProbeInfo(IEnergyInfoProvider capability, IProbeInfo probeInfo, Player player,
                                 BlockEntity blockEntity, IProbeHitData data) {
-
         var energyInfo = capability.getEnergyInfo();
         if (energyInfo.capacity().compareTo(BigInteger.ZERO) <= 0) return;
         var threshold = BigInteger.valueOf((long) 1e12);
