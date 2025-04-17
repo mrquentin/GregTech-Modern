@@ -139,12 +139,14 @@ public class AdvancedEnergyDetectorCover extends EnergyDetectorCover implements 
                 .isMultiLang()
                 .setTooltipText("cover.advanced_energy_detector.invert"));
 
-        // Mode (EU / Percent) Toggle:
-        group.addWidget(new ToggleButtonWidget(
-                176 - 29, 20, 20, 20,
-                GuiTextures.ENERGY_DETECTOR_COVER_MODE_BUTTON, this::isUsePercent, this::setUsePercent)
-                .isMultiLang()
-                .setTooltipText("cover.advanced_energy_detector.use_percent"));
+        // Mode (EU / Percent) Toggle: (not for big integer as we don't have a widget to enter numbers bigger than long)
+        if (!getEnergyInfoProvider().supportsBigIntEnergyValues()) {
+            group.addWidget(new ToggleButtonWidget(
+                    176 - 29, 20, 20, 20,
+                    GuiTextures.ENERGY_DETECTOR_COVER_MODE_BUTTON, this::isUsePercent, this::setUsePercent)
+                    .isMultiLang()
+                    .setTooltipText("cover.advanced_energy_detector.use_percent"));
+        }
 
         return group;
     }
