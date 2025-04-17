@@ -98,7 +98,8 @@ public class AdvancedEnergyDetectorCover extends EnergyDetectorCover implements 
                     setRedstoneSignalOutput(isInverted() ? 15 : 0);
                 }
             } else {
-                setRedstoneSignalOutput(computeLatchedRedstoneBetweenValues(energyInfo.stored().longValue(), this.maxValue, this.minValue,
+                setRedstoneSignalOutput(computeLatchedRedstoneBetweenValues(energyInfo.stored().longValue(),
+                        this.maxValue, this.minValue,
                         isInverted(), redstoneSignalOutput));
             }
         }

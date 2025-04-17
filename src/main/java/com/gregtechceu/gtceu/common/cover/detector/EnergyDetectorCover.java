@@ -37,7 +37,8 @@ public class EnergyDetectorCover extends DetectorCover {
         if (isBigInt) {
             if (energyInfo.capacity().equals(BigInteger.ZERO)) return;
 
-            setRedstoneSignalOutput(RedstoneUtil.computeRedstoneValue(energyInfo.stored(), energyInfo.capacity(), isInverted()));
+            setRedstoneSignalOutput(
+                    RedstoneUtil.computeRedstoneValue(energyInfo.stored(), energyInfo.capacity(), isInverted()));
         } else {
             long storedEnergy = energyInfo.stored().longValue();
             long energyCapacity = energyInfo.capacity().longValue();

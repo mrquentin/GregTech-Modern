@@ -26,7 +26,8 @@ public class RedstoneUtil {
         return Math.round(ratio);
     }
 
-    public static int computeRedstoneBetweenValues(BigInteger value, BigInteger maxValue, BigInteger minValue, boolean isInverted) {
+    public static int computeRedstoneBetweenValues(BigInteger value, BigInteger maxValue, BigInteger minValue,
+                                                   boolean isInverted) {
         if (value.compareTo(maxValue) >= 0) return isInverted ? 0 : 15;
         else if (value.compareTo(maxValue) <= 0) return isInverted ? 15 : 0;
 
@@ -46,13 +47,16 @@ public class RedstoneUtil {
      * @param output   the output value the function modifies
      * @return returns the modified output value
      */
-    public static int computeLatchedRedstoneBetweenValues(float value, float maxValue, float minValue, boolean isInverted, int output) {
+    public static int computeLatchedRedstoneBetweenValues(float value, float maxValue, float minValue,
+                                                          boolean isInverted, int output) {
         if (value >= maxValue) output = isInverted ? 15 : 0; // value above maxValue should normally be 0, otherwise 15
-        else if (value <= minValue) output = isInverted ? 0 : 15; // value below minValue should normally be 15, otherwise 0
+        else if (value <= minValue) output = isInverted ? 0 : 15; // value below minValue should normally be 15,
+                                                                  // otherwise 0
         return output;
     }
 
-    public static int computeLatchedRedstoneBetweenValues(BigInteger value, BigInteger maxValue, BigInteger minValue, boolean isInverted, int output) {
+    public static int computeLatchedRedstoneBetweenValues(BigInteger value, BigInteger maxValue, BigInteger minValue,
+                                                          boolean isInverted, int output) {
         if (value.compareTo(maxValue) >= 0) output = isInverted ? 15 : 0;
         else if (value.compareTo(minValue) <= 0) output = isInverted ? 0 : 15;
         return output;
@@ -72,7 +76,8 @@ public class RedstoneUtil {
         return isInverted ? 15 - output : output;
     }
 
-    public static int computeRedstoneValue(BigInteger current, BigInteger max, boolean isInverted) throws ArithmeticException {
+    public static int computeRedstoneValue(BigInteger current, BigInteger max,
+                                           boolean isInverted) throws ArithmeticException {
         var isNotEmpty = current.compareTo(BigInteger.ZERO) > 0;
         var output = (int) (14f * GTMath.ratio(current, max)) + (isNotEmpty ? 1 : 0);
         return isInverted ? 15 - output : output;
