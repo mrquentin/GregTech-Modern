@@ -14,34 +14,27 @@ public class RedstoneUtil {
      * @return an int from 0 (value <= min) to 15 (value >= max) normally, with a ratio when the value is between min
      *         and max
      */
-    public static int computeRedstoneBetweenValues(Number value, Number maxValue, Number minValue, boolean isInverted) {
-        if (value instanceof BigInteger || maxValue instanceof BigInteger || minValue instanceof BigInteger) {
-            var bigValue = MathUtils.numberToBigInteger(value);
-            var bigMaxValue = MathUtils.numberToBigInteger(maxValue);
-            var bigMinValue = MathUtils.numberToBigInteger(minValue);
 
-            if (bigValue.compareTo(bigMaxValue) >= 0) return isInverted ? 0 : 15;
-            else if (bigValue.compareTo(bigMinValue) <= 0) return isInverted ? 15 : 0;
+    public static int computeRedstoneBetweenValues(float value, float maxValue, float minValue, boolean isInverted) {
+        if (value >= maxValue) return isInverted ? 0 : 15;
+        else if (value <= minValue) return isInverted ? 15 : 0;
 
-            float ratio;
-            if (!isInverted) ratio = 15 * MathUtils.ratio(bigValue.subtract(bigMinValue), bigMaxValue.subtract(bigMinValue));
-            else ratio = 15 * MathUtils.ratio(bigMaxValue.subtract(bigValue), bigMaxValue.subtract(bigMinValue));
+        float ratio;
+        if (isInverted) ratio = 15 * (maxValue - value) / (maxValue - minValue);
+        else ratio = 15 * (value - minValue) / (maxValue - minValue);
 
-            return Math.round(ratio);
-        } else {
-            var floatValue = value.floatValue();
-            var floatMaxValue = maxValue.floatValue();
-            var floatMinValue = minValue.floatValue();
+        return Math.round(ratio);
+    }
 
-            if (floatValue >= floatMaxValue) return isInverted ? 0 : 15;
-            else if (floatValue <= floatMinValue) return isInverted ? 15 : 0;
+    public static int computeRedstoneBetweenValues(BigInteger value, BigInteger maxValue, BigInteger minValue, boolean isInverted) {
+        if (value.compareTo(maxValue) >= 0) return isInverted ? 0 : 15;
+        else if (value.compareTo(maxValue) <= 0) return isInverted ? 15 : 0;
 
-            float ratio;
-            if (!isInverted) ratio = 15 * (floatValue - floatMinValue) / (floatMaxValue - floatMinValue);
-            else ratio = 15 * (floatMaxValue - floatValue) / (floatMaxValue - floatMinValue);
+        float ratio;
+        if (isInverted) ratio = 15 * GTMath.ratio(maxValue.subtract(value), maxValue.subtract(minValue));
+        else ratio = 15 * GTMath.ratio(value.subtract(minValue), maxValue.subtract(minValue));
 
-            return Math.round(ratio);
-        }
+        return Math.round(ratio);
     }
 
     /**
@@ -53,22 +46,15 @@ public class RedstoneUtil {
      * @param output   the output value the function modifies
      * @return returns the modified output value
      */
-    public static int computeLatchedRedstoneBetweenValues(Number value, Number maxValue, Number minValue, boolean isInverted, int output) {
-        if (value instanceof BigInteger || maxValue instanceof BigInteger || minValue instanceof BigInteger) {
-            var bigValue = MathUtils.numberToBigInteger(value);
-            var bigMaxValue = MathUtils.numberToBigInteger(maxValue);
-            var bigMinValue = MathUtils.numberToBigInteger(minValue);
+    public static int computeLatchedRedstoneBetweenValues(float value, float maxValue, float minValue, boolean isInverted, int output) {
+        if (value >= maxValue) output = isInverted ? 15 : 0; // value above maxValue should normally be 0, otherwise 15
+        else if (value <= minValue) output = isInverted ? 0 : 15; // value below minValue should normally be 15, otherwise 0
+        return output;
+    }
 
-            if (bigValue.compareTo(bigMaxValue) >= 0) output = !isInverted ? 0 : 15; // value above maxValue should normally be 0, otherwise 15
-            else if (bigValue.compareTo(bigMinValue) <= 0) output = !isInverted ? 15 : 0; // value below minValue should normally be 15, otherwise 0
-        } else {
-            var floatValue = value.floatValue();
-            var floatMaxValue = maxValue.floatValue();
-            var floatMinValue = minValue.floatValue();
-
-            if (floatValue >= floatMaxValue) output = !isInverted ? 0 : 15; // value above maxValue should normally be 0, otherwise 15
-            else if (floatValue <= floatMinValue) output = !isInverted ? 15 : 0; // value below minValue should normally be 15, otherwise 0
-        }
+    public static int computeLatchedRedstoneBetweenValues(BigInteger value, BigInteger maxValue, BigInteger minValue, boolean isInverted, int output) {
+        if (value.compareTo(maxValue) >= 0) output = isInverted ? 15 : 0;
+        else if (value.compareTo(minValue) <= 0) output = isInverted ? 0 : 15;
         return output;
     }
 
@@ -81,18 +67,14 @@ public class RedstoneUtil {
      * @return value 0 to 15; A value of <em>at least</em> 1 is returned if current > 0
      * @throws ArithmeticException when max is 0
      */
-    public static int computeRedstoneValue(Number current, Number max, boolean isInverted) throws ArithmeticException {
-        int output;
-        if (current instanceof BigInteger || max instanceof BigInteger) {
-            var bigCurrent = MathUtils.numberToBigInteger(current);
-            var bigMax = MathUtils.numberToBigInteger(max);
-            var isNotEmpty = bigCurrent.compareTo(BigInteger.ZERO) > 0;
-            output = (int) (14f * MathUtils.ratio(bigCurrent, bigMax)) + (isNotEmpty ? 1 : 0);
-        } else {
-            var floatCurrent = current.floatValue();
-            var floatMax = max.floatValue();
-            output = (int) (14f * floatCurrent / floatMax) + (floatCurrent > 0 ? 1 : 0);
-        }
-        return isInverted ? 15 - output: output;
+    public static int computeRedstoneValue(long current, long max, boolean isInverted) throws ArithmeticException {
+        var output = (int) (14f * current / max) + (current > 0 ? 1 : 0);
+        return isInverted ? 15 - output : output;
+    }
+
+    public static int computeRedstoneValue(BigInteger current, BigInteger max, boolean isInverted) throws ArithmeticException {
+        var isNotEmpty = current.compareTo(BigInteger.ZERO) > 0;
+        var output = (int) (14f * GTMath.ratio(current, max)) + (isNotEmpty ? 1 : 0);
+        return isInverted ? 15 - output : output;
     }
 }

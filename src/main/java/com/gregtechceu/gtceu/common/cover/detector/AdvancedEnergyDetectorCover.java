@@ -10,7 +10,6 @@ import com.gregtechceu.gtceu.api.gui.widget.LongInputWidget;
 import com.gregtechceu.gtceu.api.gui.widget.ToggleButtonWidget;
 import com.gregtechceu.gtceu.utils.GTMath;
 
-import com.gregtechceu.gtceu.utils.MathUtils;
 import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
 import com.lowdragmc.lowdraglib.gui.widget.TextBoxWidget;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
@@ -77,20 +76,31 @@ public class AdvancedEnergyDetectorCover extends EnergyDetectorCover implements 
         var energyInfo = energyInfoProvider.getEnergyInfo();
         var isBigInt = energyInfoProvider.supportsBigIntEnergyValues();
 
-        Number capacity = isBigInt ? energyInfo.capacity() : energyInfo.capacity().longValue();
-        Number stored = isBigInt ? energyInfo.stored() : energyInfo.stored().longValue();
-
-        if (usePercent) {
-            if (MathUtils.compare(capacity, 0) > 0) {
-                var ratio = MathUtils.ratio(capacity, stored);
-                setRedstoneSignalOutput(computeLatchedRedstoneBetweenValues(ratio * 100, maxValue,
-                        minValue, isInverted(), redstoneSignalOutput));
+        if (isBigInt) {
+            if (usePercent) {
+                if (energyInfo.capacity().compareTo(BigInteger.ZERO) > 0) {
+                    var ratio = GTMath.ratio(energyInfo.stored(), energyInfo.capacity());
+                    setRedstoneSignalOutput(computeLatchedRedstoneBetweenValues(ratio * 100, maxValue,
+                            minValue, isInverted(), redstoneSignalOutput));
+                } else {
+                    setRedstoneSignalOutput(isInverted() ? 15 : 0);
+                }
             } else {
-                setRedstoneSignalOutput(isInverted() ? 15 : 0);
+                // DO nothing as BigInt should always be used with percents
             }
         } else {
-            setRedstoneSignalOutput(computeLatchedRedstoneBetweenValues(stored, this.maxValue, this.minValue,
-                    isInverted(), redstoneSignalOutput));
+            if (usePercent) {
+                if (energyInfo.capacity().longValue() > 0) {
+                    var ratio = energyInfo.stored().longValue() / energyInfo.capacity().longValue();
+                    setRedstoneSignalOutput(computeLatchedRedstoneBetweenValues(ratio * 100, maxValue,
+                            minValue, isInverted(), redstoneSignalOutput));
+                } else {
+                    setRedstoneSignalOutput(isInverted() ? 15 : 0);
+                }
+            } else {
+                setRedstoneSignalOutput(computeLatchedRedstoneBetweenValues(energyInfo.stored().longValue(), this.maxValue, this.minValue,
+                        isInverted(), redstoneSignalOutput));
+            }
         }
     }
 
