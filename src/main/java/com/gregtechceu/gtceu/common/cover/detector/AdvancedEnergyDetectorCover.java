@@ -72,7 +72,6 @@ public class AdvancedEnergyDetectorCover extends EnergyDetectorCover implements 
         IEnergyInfoProvider energyInfoProvider = getEnergyInfoProvider();
         if (energyInfoProvider == null) return;
 
-        // TODO properly support values > MAX_LONG
         var energyInfo = energyInfoProvider.getEnergyInfo();
         var isBigInt = energyInfoProvider.supportsBigIntEnergyValues();
 
@@ -86,8 +85,8 @@ public class AdvancedEnergyDetectorCover extends EnergyDetectorCover implements 
                     setRedstoneSignalOutput(isInverted() ? 15 : 0);
                 }
             } else {
-                setRedstoneSignalOutput(computeLatchedRedstoneBetweenValues(energyInfo.stored().longValue(),
-                        this.maxValue, this.minValue,
+                setRedstoneSignalOutput(computeLatchedRedstoneBetweenValues(energyInfo.stored(),
+                        BigInteger.valueOf(this.maxValue), BigInteger.valueOf(this.minValue),
                         isInverted(), redstoneSignalOutput));
             }
         } else {
@@ -142,7 +141,7 @@ public class AdvancedEnergyDetectorCover extends EnergyDetectorCover implements 
                 .isMultiLang()
                 .setTooltipText("cover.advanced_energy_detector.invert"));
 
-        // Mode (EU / Percent) Toggle: (not for big integer as we don't have a widget to enter numbers bigger than long)
+        // Mode (EU / Percent) Toggle:
         group.addWidget(new ToggleButtonWidget(
                 176 - 29, 20, 20, 20,
                 GuiTextures.ENERGY_DETECTOR_COVER_MODE_BUTTON, this::isUsePercent, this::setUsePercent)
