@@ -155,7 +155,12 @@ public class AdvancedEnergyDetectorCover extends EnergyDetectorCover implements 
         if (GTCEu.isClientThread() || minValueInput == null || maxValueInput == null)
             return;
 
-        long energyCapacity = getEnergyInfoProvider().getEnergyInfo().capacity().longValue();
+        long energyCapacity;
+        try {
+            energyCapacity = getEnergyInfoProvider().getEnergyInfo().capacity().longValueExact();
+        } catch (ArithmeticException e) {
+            energyCapacity = Long.MAX_VALUE;
+        }
 
         minValueInput.setMin(0L);
         maxValueInput.setMin(0L);
