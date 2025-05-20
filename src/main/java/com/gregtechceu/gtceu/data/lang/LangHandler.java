@@ -1410,6 +1410,10 @@ public class LangHandler {
         provider.add("gtceu.tooltip.status.trinary.false", "False");
         provider.add("gtceu.tooltip.status.trinary.true", "True");
         provider.add("gtceu.tooltip.status.trinary.unknown", "Unknown");
+
+
+        provider.add("gtceu.multiblock.module.base.count", "Linked to %s bases");
+        provider.add("gtceu.multiblock.base.module.count", "Linked to %s modules");
     }
 
     /**

@@ -42,6 +42,7 @@ public class PartAbility {
     public static final PartAbility PARALLEL_HATCH = new PartAbility("parallel_hatch");
     public static final PartAbility INPUT_LASER = new PartAbility("input_laser");
     public static final PartAbility OUTPUT_LASER = new PartAbility("output_laser");
+    public static final PartAbility MODULE_CONNECTOR = new PartAbility("module_connector");
 
     public static final PartAbility COMPUTATION_DATA_RECEPTION = new PartAbility("computation_data_reception");
     public static final PartAbility COMPUTATION_DATA_TRANSMISSION = new PartAbility("computation_data_transmission");

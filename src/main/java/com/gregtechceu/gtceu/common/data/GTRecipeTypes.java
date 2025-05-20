@@ -26,6 +26,7 @@ import com.gregtechceu.gtceu.integration.kjs.GTRegistryInfo;
 import com.gregtechceu.gtceu.integration.xei.handlers.item.CycleItemStackHandler;
 import com.gregtechceu.gtceu.utils.ResearchManager;
 
+import com.lowdragmc.lowdraglib.gui.texture.ProgressTexture;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 
 import net.minecraft.client.resources.language.I18n;
@@ -666,6 +667,28 @@ public class GTRecipeTypes {
         GTRegistries.RECIPE_TYPES.register(recipeType.registryName, recipeType);
         return recipeType;
     }
+
+    public static final GTRecipeType ORBITAL_FORGE = GTRecipeTypes
+            .register("orbital_forge", GTRecipeTypes.MULTIBLOCK)
+            .setHasResearchSlot(true)
+            .setMaxTooltips(4)
+            .setMaxIOSize(3, 3, 3, 3)
+            .setProgressBar(GuiTextures.PROGRESS_BAR_ARROW, ProgressTexture.FillDirection.LEFT_TO_RIGHT)
+            .addDataInfo(data -> {
+                int temp = data.getInt("ebf_temp");
+                return LocalizationUtils.format("gtceu.recipe.temperature", temp);
+            })
+            .addDataInfo(data -> {
+                int temp = data.getInt("ebf_temp");
+                ICoilType requiredCoil = ICoilType.getMinRequiredType(temp);
+
+                if (requiredCoil != null && !requiredCoil.getMaterial().isNull()) {
+                    return LocalizationUtils.format("gtceu.recipe.coil.tier",
+                            I18n.get(requiredCoil.getMaterial().getUnlocalizedName()));
+                }
+                return "";
+            });
+
 
     public static void init() {
         GCYMRecipeTypes.init();

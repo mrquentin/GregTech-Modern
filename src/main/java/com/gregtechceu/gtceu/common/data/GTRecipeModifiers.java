@@ -17,6 +17,7 @@ import com.gregtechceu.gtceu.api.recipe.modifier.RecipeModifier;
 import com.gregtechceu.gtceu.common.capability.EnvironmentalHazardSavedData;
 import com.gregtechceu.gtceu.config.ConfigHolder;
 
+import com.gregtechceu.gtceu.tmp.register.OrbitalForgeModule;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -243,5 +244,31 @@ public class GTRecipeModifiers {
                 .build();
 
         return baseModifier.andThen(ocModifier).andThen(parallelModifier);
+    }
+
+    public static @NotNull ModifierFunction ebfModuleOverclock(@NotNull MetaMachine machine, @NotNull GTRecipe recipe) {
+        if (!(machine instanceof OrbitalForgeModule coilMachine)) {
+            return RecipeModifier.nullWrongType(OrbitalForgeModule.class, machine);
+        }
+
+        int blastFurnaceTemperature = coilMachine.getCoilType().getCoilTemperature() +
+                (100 * Math.max(0, coilMachine.getTier() - GTValues.MV));
+        int recipeTemp = recipe.data.getInt("ebf_temp");
+        if (!recipe.data.contains("ebf_temp") || recipeTemp > blastFurnaceTemperature) {
+            return ModifierFunction.NULL;
+        }
+
+        if (RecipeHelper.getRecipeEUtTier(recipe) > coilMachine.getTier()) {
+            return ModifierFunction.NULL;
+        }
+
+        var discount = ModifierFunction.builder()
+                .eutMultiplier(getCoilEUtDiscount(recipeTemp, blastFurnaceTemperature))
+                .build();
+
+        OverclockingLogic logic = (p, v) -> OverclockingLogic.heatingCoilOC(p, v, recipeTemp, blastFurnaceTemperature);
+        var oc = logic.getModifier(machine, recipe, coilMachine.getOverclockVoltage());
+
+        return oc.compose(discount);
     }
 }

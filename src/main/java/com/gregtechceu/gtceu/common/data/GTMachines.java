@@ -29,6 +29,9 @@ import com.gregtechceu.gtceu.common.pipelike.item.longdistance.LDItemEndpointMac
 import com.gregtechceu.gtceu.config.ConfigHolder;
 import com.gregtechceu.gtceu.data.lang.LangHandler;
 import com.gregtechceu.gtceu.integration.kjs.GTRegistryInfo;
+import com.gregtechceu.gtceu.tmp.modular.ModuleConnectorPartMachine;
+import com.gregtechceu.gtceu.tmp.register.OrbitalForgeEBFModule;
+import com.gregtechceu.gtceu.tmp.register.OrbitalForgeModularMachine;
 import com.gregtechceu.gtceu.utils.FormattingUtil;
 
 import net.minecraft.ChatFormatting;
@@ -48,6 +51,7 @@ import java.util.function.BiConsumer;
 import static com.gregtechceu.gtceu.api.GTValues.*;
 import static com.gregtechceu.gtceu.api.capability.recipe.IO.IN;
 import static com.gregtechceu.gtceu.api.capability.recipe.IO.OUT;
+import static com.gregtechceu.gtceu.api.machine.multiblock.PartAbility.MODULE_CONNECTOR;
 import static com.gregtechceu.gtceu.common.data.GTCreativeModeTabs.MACHINE;
 import static com.gregtechceu.gtceu.common.data.GTRecipeTypes.DUMMY_RECIPES;
 import static com.gregtechceu.gtceu.common.data.GTRecipeTypes.STEAM_BOILER_RECIPES;
@@ -1074,10 +1078,22 @@ public class GTMachines {
     public static final MachineDefinition[] LASER_OUTPUT_HATCH_4096 = registerLaserHatch(OUT, 4096,
             PartAbility.OUTPUT_LASER);
 
+
+    public static final MachineDefinition MODULE_CONNECTOR = REGISTRATE
+            .machine("module_connector", ModuleConnectorPartMachine::new)
+            .langValue("Module Connector")
+            .rotationState(RotationState.Y_AXIS)
+            .abilities(PartAbility.MODULE_CONNECTOR)
+            .overlayTieredHullRenderer("module_connector")
+            .register();
+
     public static void init() {
         GTMultiMachines.init();
         GCYMMachines.init();
         GTResearchMachines.init();
+
+        OrbitalForgeModularMachine.init();
+        OrbitalForgeEBFModule.init();
 
         if (GTCEu.Mods.isAE2Loaded()) {
             GTAEMachines.init();
