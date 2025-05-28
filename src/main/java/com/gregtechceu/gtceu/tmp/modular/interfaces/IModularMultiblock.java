@@ -1,4 +1,4 @@
-package com.gregtechceu.gtceu.tmp.modular;
+package com.gregtechceu.gtceu.tmp.modular.interfaces;
 
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.capability.recipe.IRecipeHandler;
@@ -7,7 +7,7 @@ import net.minecraft.core.BlockPos;
 
 import java.util.List;
 
-public interface IModularMultiblock {
+public non-sealed interface IModularMultiblock extends IModularBase {
 
     void addModule(IMultiblockModule module);
 
@@ -21,7 +21,7 @@ public interface IModularMultiblock {
 
     boolean isWorking();
 
-    BlockPos getPos();
+    boolean isFormed();
 
     List<IRecipeHandler<?>> getCapabilities(IO io, RecipeCapability<?> cap);
 }

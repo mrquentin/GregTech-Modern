@@ -1,8 +1,8 @@
-package com.gregtechceu.gtceu.tmp.modular;
+package com.gregtechceu.gtceu.tmp.modular.interfaces;
 
 import net.minecraft.core.BlockPos;
 
-public interface IMultiblockModule {
+public non-sealed interface IMultiblockModule extends IModularBase {
 
     void addBase(IModularMultiblock base);
 
@@ -10,9 +10,11 @@ public interface IMultiblockModule {
 
     void onBaseUpdate();
 
+    void onBaseFormed();
+
+    void onBaseInvalid();
+
     void notifyBases();
 
     int getBaseCount();
-
-    BlockPos getPos();
 }

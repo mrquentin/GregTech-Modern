@@ -8,4 +8,10 @@ public class OrbitalForgeModularMultiblockMachine extends CoilWorkableElectricMo
     public OrbitalForgeModularMultiblockMachine(IMachineBlockEntity holder, Object... args) {
         super(holder, args);
     }
+
+    @Override
+    public void setWorkingEnabled(boolean isWorkingAllowed) {
+        super.setWorkingEnabled(isWorkingAllowed);
+        notifyModules();
+    }
 }

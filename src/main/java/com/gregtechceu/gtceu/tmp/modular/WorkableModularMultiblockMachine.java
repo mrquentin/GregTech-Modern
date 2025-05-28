@@ -7,6 +7,8 @@ import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.MetaMachine;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiPart;
 import com.gregtechceu.gtceu.api.machine.multiblock.WorkableMultiblockMachine;
+import com.gregtechceu.gtceu.tmp.modular.interfaces.IModularMultiblock;
+import com.gregtechceu.gtceu.tmp.modular.interfaces.IMultiblockModule;
 import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
@@ -96,6 +98,7 @@ public class WorkableModularMultiblockMachine extends WorkableMultiblockMachine 
             }
         }
         setModules(poss);
+        this.moduleMachines.forEach(IMultiblockModule::onBaseFormed);
     }
 
     @Override
@@ -107,8 +110,9 @@ public class WorkableModularMultiblockMachine extends WorkableMultiblockMachine 
                 module.removeBase(this);
             }
         }
-        this.modulesPoss.clear();
+        this.moduleMachines.forEach(IMultiblockModule::onBaseInvalid);
         this.moduleMachines.clear();
+        this.modulesPoss.clear();
     }
 
     @Override

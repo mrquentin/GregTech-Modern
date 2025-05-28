@@ -17,6 +17,9 @@ import com.gregtechceu.gtceu.api.recipe.modifier.RecipeModifier;
 import com.gregtechceu.gtceu.common.capability.EnvironmentalHazardSavedData;
 import com.gregtechceu.gtceu.config.ConfigHolder;
 
+import com.gregtechceu.gtceu.tmp.modular.CoilWorkableElectricMultiblockMachineModule;
+import com.gregtechceu.gtceu.tmp.modular.WorkableElectricMultiblockMachineModule;
+import com.gregtechceu.gtceu.tmp.register.OrbitalForgeEBFModule;
 import com.gregtechceu.gtceu.tmp.register.OrbitalForgeModule;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -248,8 +251,9 @@ public class GTRecipeModifiers {
 
     public static @NotNull ModifierFunction ebfModuleOverclock(@NotNull MetaMachine machine, @NotNull GTRecipe recipe) {
         if (!(machine instanceof OrbitalForgeModule coilMachine)) {
-            return RecipeModifier.nullWrongType(OrbitalForgeModule.class, machine);
+            return RecipeModifier.nullWrongType(CoilWorkableElectricMultiblockMachineModule.class, machine);
         }
+        if (!coilMachine.isBasesFormed()) return ModifierFunction.NULL;
 
         int blastFurnaceTemperature = coilMachine.getCoilType().getCoilTemperature() +
                 (100 * Math.max(0, coilMachine.getTier() - GTValues.MV));

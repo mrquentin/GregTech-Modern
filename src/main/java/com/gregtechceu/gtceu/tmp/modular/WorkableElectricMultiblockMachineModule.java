@@ -17,10 +17,11 @@ import com.gregtechceu.gtceu.api.machine.feature.ITieredMachine;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IDisplayUIMachine;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiPart;
 import com.gregtechceu.gtceu.api.machine.multiblock.MultiblockDisplayText;
-import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
 import com.gregtechceu.gtceu.utils.GTUtil;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.widget.*;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import lombok.Getter;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
@@ -59,10 +60,6 @@ public class WorkableElectricMultiblockMachineModule extends WorkableMultiblockM
     public void onStructureFormed() {
         super.onStructureFormed();
         this.energyContainer = getEnergyContainer();
-        for (IModularMultiblock base : getBaseMultiBlocks()) {
-            addHandlerList(RecipeHandlerList.of(IO.IN, base.getCapabilities(IO.IN, EURecipeCapability.CAP)));
-            addHandlerList(RecipeHandlerList.of(IO.OUT, base.getCapabilities(IO.OUT, EURecipeCapability.CAP)));
-        }
         this.tier = GTUtil.getFloorTierByVoltage(getMaxVoltage());
         notifyBases();
     }
@@ -82,12 +79,29 @@ public class WorkableElectricMultiblockMachineModule extends WorkableMultiblockM
         this.tier = GTUtil.getFloorTierByVoltage(getMaxVoltage());
     }
 
+    @Override
+    public void onBaseInvalid() {
+        super.onBaseInvalid();
+        this.energyContainer = null;
+    }
+
+    @Override
+    public void onBaseFormed() {
+        super.onBaseFormed();
+        this.energyContainer = getEnergyContainer();
+    }
+
     //////////////////////////////////////
     // ********** GUI ***********//
     //////////////////////////////////////
 
     @Override
     public void addDisplayText(List<Component> textList) {
+        if (!this.basesFormed) {
+            textList.add(Component.translatable("cosmiccore.multiblock.module.base.not_formed"));
+            return;
+        }
+
         int numParallels;
         boolean exact = false;
         if (recipeLogic.isActive() && recipeLogic.getLastRecipe() != null) {
@@ -199,20 +213,32 @@ public class WorkableElectricMultiblockMachineModule extends WorkableMultiblockM
 
     public CosmicEnergyContainerList getEnergyContainer() {
         List<IEnergyContainer> containers = new ArrayList<>();
+
         // From base multiblocks
         for (var base : getBaseMultiBlocks()) {
             if (base instanceof WorkableElectricModularMultiblockMachine electricBase) {
                 containers.add(electricBase.energyContainer);
             }
         }
+
         // From module parts
-        var handlers = getCapabilitiesFlat(IO.IN, EURecipeCapability.CAP);
-        if (handlers.isEmpty()) handlers = getCapabilitiesFlat(IO.OUT, EURecipeCapability.CAP);
-        for (IRecipeHandler<?> handler : handlers) {
-            if (handler instanceof IEnergyContainer container) {
-                containers.add(container);
+        Long2ObjectMap<IO> ioMap = getMultiblockState().getMatchContext().getOrCreate("ioMap", Long2ObjectMaps::emptyMap);
+        for (IMultiPart part : getParts()) {
+            IO io = ioMap.getOrDefault(part.self().getPos().asLong(), IO.BOTH);
+            if (io == IO.NONE) continue;
+
+            var handlerLists = part.getRecipeHandlers();
+            for (var handlerList : handlerLists) {
+                if (!handlerList.isValid(io)) continue;
+                for (IRecipeHandler<?> handler : handlerList.getCapability(EURecipeCapability.CAP)) {
+                    if (handler instanceof IEnergyContainer container) {
+                        containers.add(container);
+                    }
+                }
             }
         }
+
+//        if (containers.size() == 1) return containers.get(0);
         return new CosmicEnergyContainerList(containers);
     }
 

@@ -3,9 +3,10 @@ package com.gregtechceu.gtceu.tmp.modular;
 import com.gregtechceu.gtceu.api.block.ICoilType;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.common.block.CoilBlock;
+import com.gregtechceu.gtceu.tmp.modular.interfaces.ICoilModular;
 import lombok.Getter;
 
-public class CoilWorkableElectricModularMultiblockMachine extends WorkableElectricModularMultiblockMachine {
+public class CoilWorkableElectricModularMultiblockMachine extends WorkableElectricModularMultiblockMachine implements ICoilModular {
 
     @Getter
     private ICoilType coilType = CoilBlock.CoilType.CUPRONICKEL;
