@@ -1,5 +1,6 @@
 package com.gregtechceu.gtceu.tmp.modular;
 
+import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.capability.recipe.IRecipeHandler;
 import com.gregtechceu.gtceu.api.capability.recipe.RecipeCapability;
@@ -38,24 +39,102 @@ public class WorkableModularMultiblockMachine extends WorkableMultiblockMachine 
         return MANAGED_FIELD_HOLDER;
     }
 
+    /// ============================================================
+    /// ======================= LIFECYCLE ==========================
+    /// ============================================================
+
+    ///  made final to avoid further overriding in subclasses
     @Override
-    public void addModule(IMultiblockModule module) {
+    public final void onStructureFormed() {
+        super.onStructureFormed();
+        onBaseStructureFormed();
+        for (IMultiblockModule moduleMachine : this.moduleMachines)
+            moduleMachine.onBaseFormed();
+    }
+
+    /// Extracted the formation logic to another method in order to always have the onBaseFormed callback happen after all the setup is over
+    public void onBaseStructureFormed() {
+        Map<Long, IO> ioMap = getMultiblockState().getMatchContext().getOrCreate("ioMap", Long2ObjectMaps::emptyMap);
+        var poss = new ArrayList<BlockPos>();
+        for (IMultiPart part : getParts()) {
+            if (part instanceof ModuleConnectorPartMachine) {
+                for (var controller : part.getControllers()) {
+                    if (controller instanceof IMultiblockModule master) {
+                        poss.add(master.getPos());
+                    }
+                }
+            }
+        }
+        setModules(poss);
+    }
+
+    @Override
+    public final void onStructureInvalid() {
+        super.onStructureInvalid();
+        onBaseStructureInvalid();
+        this.moduleMachines.forEach(IMultiblockModule::onBaseInvalid);
+        this.moduleMachines.clear();
+        this.modulesPoss.clear();
+    }
+
+    public void onBaseStructureInvalid() {
+        var modules = getModules();
+        if (!modules.isEmpty()) {
+            for (var module : modules) {
+                module.removeBase(this);
+            }
+        }
+    }
+
+    /// ============================================================
+    /// ============== MODULE LIFECYCLE CALLBACKS ==================
+    /// ============================================================
+
+
+    @Override
+    public void onModuleFormed() {
+        GTCEu.LOGGER.info("onModuleFormed. IsClient: {}", getLevel().isClientSide);
+    }
+
+    @Override
+    public void onModuleInvalid() {
+        GTCEu.LOGGER.info("onModuleInvalid. IsClient: {}", getLevel().isClientSide);
+    }
+
+    @Override
+    public void onModuleUpdate() {
+        GTCEu.LOGGER.info("onModuleUpdate. IsClient: {}", getLevel().isClientSide);
+    }
+
+    @Override
+    public void notifyModules() {
+        for (IMultiblockModule module : getModules()) {
+            module.onBaseUpdate();
+        }
+    }
+
+    /// ============================================================
+    /// =================== MODULES MANAGEMENT =====================
+    /// ============================================================
+
+    @Override
+    public final void addModule(IMultiblockModule module) {
         modulesPoss.add(module.getPos());
         moduleMachines.add(module);
     }
 
     @Override
-    public void removeModule(IMultiblockModule module) {
+    public final void removeModule(IMultiblockModule module) {
         modulesPoss.remove(module.getPos());
         moduleMachines.remove(module);
     }
 
     @Override
-    public int getModuleCount() {
+    public final int getModuleCount() {
         return modulesPoss.size();
     }
 
-    public void setModules(List<BlockPos> posList) {
+    public final void setModules(List<BlockPos> posList) {
         modulesResolved = true;
         var level = getLevel();
         if (level == null || posList.isEmpty()) moduleMachines.clear();
@@ -72,7 +151,7 @@ public class WorkableModularMultiblockMachine extends WorkableMultiblockMachine 
         }
     }
 
-    public Set<IMultiblockModule> getModulesPoss() {
+    public final Set<IMultiblockModule> getModules() {
         if (!modulesResolved) setModules(new ArrayList<>(modulesPoss));
         return Collections.unmodifiableSet(moduleMachines);
     }
@@ -83,52 +162,7 @@ public class WorkableModularMultiblockMachine extends WorkableMultiblockMachine 
     }
 
     @Override
-    public void onStructureFormed() {
-        super.onStructureFormed();
-
-        Map<Long, IO> ioMap = getMultiblockState().getMatchContext().getOrCreate("ioMap", Long2ObjectMaps::emptyMap);
-        var poss = new ArrayList<BlockPos>();
-        for (IMultiPart part : getParts()) {
-            if (part instanceof ModuleConnectorPartMachine) {
-                for (var controller : part.getControllers()) {
-                    if (controller instanceof IMultiblockModule master) {
-                        poss.add(master.getPos());
-                    }
-                }
-            }
-        }
-        setModules(poss);
-        this.moduleMachines.forEach(IMultiblockModule::onBaseFormed);
-    }
-
-    @Override
-    public void onStructureInvalid() {
-        super.onStructureInvalid();
-        var modules = getModulesPoss();
-        if (!modules.isEmpty()) {
-            for (var module : modules) {
-                module.removeBase(this);
-            }
-        }
-        this.moduleMachines.forEach(IMultiblockModule::onBaseInvalid);
-        this.moduleMachines.clear();
-        this.modulesPoss.clear();
-    }
-
-    @Override
     public boolean isWorking() {
         return super.isWorkingEnabled();
-    }
-
-    @Override
-    public void notifyModules() {
-        for (IMultiblockModule module : getModulesPoss()) {
-            module.onBaseUpdate();
-        }
-    }
-
-    @Override
-    public void onModuleUpdate() {
-        System.out.println("ModularMulti: Update notification received. IsClient: " + getLevel().isClientSide);
     }
 }

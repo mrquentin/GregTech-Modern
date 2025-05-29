@@ -23,11 +23,7 @@ public class CosmicEnergyContainerList implements IEnergyContainer {
     @Getter
     private final long highestInputVoltage;
     @Getter
-    private final long highestOutputVoltage;
-    @Getter
     private final int numHighestInputContainers;
-    @Getter
-    private final int numHighestOutputContainers;
 
     public CosmicEnergyContainerList(List<? extends IEnergyContainer> energyContainers) {
         this.energyContainerList = extractContainers(energyContainers);
@@ -37,25 +33,20 @@ public class CosmicEnergyContainerList implements IEnergyContainer {
         long inputAmperage = 0;
         long outputAmperage = 0;
         long highestInputVoltage = 0;
-        long highestOutputVoltage = 0;
         int numHighestInputContainers = 0;
-        int numHighestOutputContainers = 0;
-
-        for (IEnergyContainer container : this.energyContainerList) {
+        for (IEnergyContainer container : energyContainerList) {
             totalInputVoltage += container.getInputVoltage() * container.getInputAmperage();
             totalOutputVoltage += container.getOutputVoltage() * container.getOutputAmperage();
             inputAmperage += container.getInputAmperage();
             outputAmperage += container.getOutputAmperage();
-            if (container.getInputVoltage() > highestInputVoltage)
+            if (container.getInputVoltage() > highestInputVoltage) {
                 highestInputVoltage = container.getInputVoltage();
-            if (container.getOutputVoltage() > highestOutputVoltage)
-                highestOutputVoltage = container.getOutputVoltage();
+            }
         }
-        for (IEnergyContainer container : this.energyContainerList) {
-            if (container.getInputVoltage() == highestInputVoltage)
+        for (IEnergyContainer container : energyContainerList) {
+            if (container.getInputVoltage() == highestInputVoltage) {
                 numHighestInputContainers++;
-            if (container.getOutputVoltage() == highestOutputVoltage)
-                numHighestOutputContainers++;
+            }
         }
 
         long[] voltageAmperage = calculateVoltageAmperage(totalInputVoltage, inputAmperage);
@@ -65,9 +56,7 @@ public class CosmicEnergyContainerList implements IEnergyContainer {
         this.outputVoltage = voltageAmperage[0];
         this.outputAmperage = voltageAmperage[1];
         this.highestInputVoltage = highestInputVoltage;
-        this.highestOutputVoltage = highestOutputVoltage;
         this.numHighestInputContainers = numHighestInputContainers;
-        this.numHighestOutputContainers = numHighestOutputContainers;
     }
 
 

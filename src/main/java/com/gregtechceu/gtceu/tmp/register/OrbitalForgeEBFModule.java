@@ -8,6 +8,7 @@ import com.gregtechceu.gtceu.api.machine.multiblock.PartAbility;
 import com.gregtechceu.gtceu.api.pattern.FactoryBlockPattern;
 import com.gregtechceu.gtceu.common.data.*;
 import com.gregtechceu.gtceu.utils.FormattingUtil;
+import com.ibm.icu.text.MessagePattern;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -31,6 +32,7 @@ public class OrbitalForgeEBFModule {
                     .where('C', blocks(GTMachines.MODULE_CONNECTOR.get()))
                     .where('#', any())
                     .where('B', blocks(GCYMBlocks.CASING_LARGE_SCALE_ASSEMBLING.get())
+                            .or(abilities(PartAbility.PARALLEL_HATCH))
                             .or(abilities(PartAbility.IMPORT_ITEMS)))
                     .build())
             .workableCasingRenderer(GTCEu.id("block/casings/gcym/large_scale_assembling_casing"),

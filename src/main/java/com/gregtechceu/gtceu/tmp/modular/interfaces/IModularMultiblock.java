@@ -15,6 +15,10 @@ public non-sealed interface IModularMultiblock extends IModularBase {
 
     void onModuleUpdate();
 
+    void onModuleFormed();
+
+    void onModuleInvalid();
+
     void notifyModules();
 
     int getModuleCount();

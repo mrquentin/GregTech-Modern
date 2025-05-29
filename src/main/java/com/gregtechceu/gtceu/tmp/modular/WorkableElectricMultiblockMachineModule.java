@@ -49,19 +49,17 @@ public class WorkableElectricMultiblockMachineModule extends WorkableMultiblockM
     // *** Multiblock Lifecycle ***//
     //////////////////////////////////////
     @Override
-    public void onStructureInvalid() {
-        super.onStructureInvalid();
-        this.energyContainer = null;
-        this.tier = 0;
-        notifyBases();
+    public void onModuleStructureFormed() {
+        super.onModuleStructureFormed();
+        this.energyContainer = getEnergyContainer();
+        this.tier = GTUtil.getFloorTierByVoltage(getMaxVoltage());
     }
 
     @Override
-    public void onStructureFormed() {
-        super.onStructureFormed();
-        this.energyContainer = getEnergyContainer();
-        this.tier = GTUtil.getFloorTierByVoltage(getMaxVoltage());
-        notifyBases();
+    public void onModuleStructureInvalid() {
+        super.onModuleStructureInvalid();
+        this.energyContainer = null;
+        this.tier = 0;
     }
 
     @Override
@@ -75,20 +73,20 @@ public class WorkableElectricMultiblockMachineModule extends WorkableMultiblockM
     @Override
     public void onBaseUpdate() {
         super.onBaseUpdate();
-        this.energyContainer = getEnergyContainer();
-        this.tier = GTUtil.getFloorTierByVoltage(getMaxVoltage());
     }
 
     @Override
     public void onBaseInvalid() {
         super.onBaseInvalid();
         this.energyContainer = null;
+        this.tier = 0;
     }
 
     @Override
     public void onBaseFormed() {
         super.onBaseFormed();
         this.energyContainer = getEnergyContainer();
+        this.tier = GTUtil.getFloorTierByVoltage(getMaxVoltage());
     }
 
     //////////////////////////////////////
@@ -215,7 +213,7 @@ public class WorkableElectricMultiblockMachineModule extends WorkableMultiblockM
         List<IEnergyContainer> containers = new ArrayList<>();
 
         // From base multiblocks
-        for (var base : getBaseMultiBlocks()) {
+        for (var base : getBases()) {
             if (base instanceof WorkableElectricModularMultiblockMachine electricBase) {
                 containers.add(electricBase.energyContainer);
             }
@@ -238,7 +236,6 @@ public class WorkableElectricMultiblockMachineModule extends WorkableMultiblockM
             }
         }
 
-//        if (containers.size() == 1) return containers.get(0);
         return new CosmicEnergyContainerList(containers);
     }
 
@@ -262,7 +259,7 @@ public class WorkableElectricMultiblockMachineModule extends WorkableMultiblockM
             }
         } else {
             // Machines
-            long highestVoltage = energyContainer.getInputVoltage();
+            long highestVoltage = energyContainer.getHighestInputVoltage();
             if (energyContainer.getNumHighestInputContainers() > 1) {
                 // allow tier + 1 if there are multiple hatches present at the highest tier
                 int tier = GTUtil.getTierByVoltage(highestVoltage);

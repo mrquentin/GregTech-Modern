@@ -1,5 +1,6 @@
 package com.gregtechceu.gtceu.tmp.modular;
 
+import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.capability.recipe.RecipeCapability;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
@@ -48,22 +49,162 @@ public class WorkableMultiblockMachineModule extends WorkableMultiblockMachine i
         return MANAGED_FIELD_HOLDER;
     }
 
+    /// ============================================================
+    /// ======================= LIFECYCLE ==========================
+    /// ============================================================
+
     @Override
-    public void addBase(IModularMultiblock base) {
+    public final void onStructureFormed() {
+        super.onStructureFormed();
+        onModuleStructureFormed();
+        for (IModularMultiblock baseMultiblock : this.baseMultiblocks) {
+            baseMultiblock.onModuleFormed();
+        }
+    }
+
+    public void onModuleStructureFormed() {
+        Map<Long, IO> ioMap = getMultiblockState().getMatchContext().getOrCreate("ioMap", Long2ObjectMaps::emptyMap);
+        var poss = new ArrayList<BlockPos>();
+        for (IMultiPart part : getParts()) {
+            if (part instanceof ModuleConnectorPartMachine) {
+                for (var controller : part.getControllers()) {
+                    if (controller instanceof IModularMultiblock master) {
+                        poss.add(master.getPos());
+                    }
+                }
+            }
+        }
+        setBases(poss);
+        updateTraitSubscriptions();
+        this.basesFormed = getBases().stream().allMatch(IModularMultiblock::isFormed);
+    }
+
+    @Override
+    public final void onStructureInvalid() {
+        super.onStructureInvalid();
+        onModuleStructureInvalid();
+        this.baseMultiblockPoss.clear();
+        this.baseMultiblocks.clear();
+    }
+
+    public void onModuleStructureInvalid() {
+        var bases = getBases();
+        if (!bases.isEmpty()) {
+            for (var base : bases) {
+                base.removeModule(this);
+            }
+        }
+    }
+
+    /// ============================================================
+    /// ============ BASE LIFECYCLE CALLBACKS ======================
+    /// ============================================================
+
+    @Override
+    public void onBaseFormed() {
+        GTCEu.LOGGER.info("onBaseFormed. IsClient: {}", getLevel().isClientSide);
+        this.basesFormed = getBases().stream().allMatch(IModularMultiblock::isFormed);
+        updateTraitSubscriptions();
+        this.recipeLogic.resetRecipeLogic();
+    }
+
+    @Override
+    public void onBaseInvalid() {
+        GTCEu.LOGGER.info("onBaseInvalid. IsClient: {}", getLevel().isClientSide);
+        this.basesFormed = false;
+        updateActiveBlocks(false);
+        activeBlocks = null;
+        capabilitiesProxy.clear();
+        capabilitiesFlat.clear();
+        traitSubscriptions.forEach(ISubscription::unsubscribe);
+        traitSubscriptions.clear();
+        recipeLogic.resetRecipeLogic();
+    }
+
+    @Override
+    public void onBaseUpdate() {
+        GTCEu.LOGGER.info("onBaseUpdate. IsClient: {}", getLevel().isClientSide);
+        updateWorkingStatus();
+    }
+
+    @Override
+    public void notifyBases() {
+        for (IModularMultiblock base : getBases()) {
+            base.onModuleUpdate();
+        }
+    }
+
+    /// ============================================================
+    /// ==================== BASES MANAGEMENT ======================
+    /// ============================================================
+
+    @Override
+    public final void addBase(IModularMultiblock base) {
         baseMultiblockPoss.add(base.getPos());
         baseMultiblocks.add(base);
     }
 
     @Override
-    public void removeBase(IModularMultiblock base) {
+    public final void removeBase(IModularMultiblock base) {
         baseMultiblockPoss.remove(base.getPos());
         baseMultiblocks.remove(base);
     }
 
     @Override
-    public int getBaseCount() {
+    public final int getBaseCount() {
         return baseMultiblocks.size();
     }
+
+    public final void setBases(List<BlockPos> posList) {
+        baseMultiblockResolved = true;
+        var level = getLevel();
+        if (level == null || posList.isEmpty()) baseMultiblocks.clear();
+        else {
+            baseMultiblockPoss.clear();
+            baseMultiblocks.clear();
+            for (var pos : posList) {
+                if (MetaMachine.getMachine(level, pos) instanceof IModularMultiblock machine) {
+                    machine.addModule(this);
+                    baseMultiblockPoss.add(pos);
+                    baseMultiblocks.add(machine);
+                }
+            }
+        }
+    }
+
+    public final List<IModularMultiblock> getBases() {
+        if (!baseMultiblockResolved) setBases(new ArrayList<>(baseMultiblockPoss));
+        return new ArrayList<>(baseMultiblocks);
+    }
+
+    /// ============================================================
+    /// ========================= OTHER ============================
+    /// ============================================================
+
+    private void updateTraitSubscriptions() {
+        Map<Long, IO> ioMap = getMultiblockState().getMatchContext().getOrCreate("ioMap", Long2ObjectMaps::emptyMap);
+
+        traitSubscriptions.forEach(ISubscription::unsubscribe);
+        traitSubscriptions.clear();
+
+        for (IMultiPart part : getParts()) {
+            IO io = ioMap.getOrDefault(part.self().getPos().asLong(), IO.BOTH);
+            if (io == IO.NONE) continue;
+
+            var handlerLists = part.getRecipeHandlers();
+            for (var handlerList : handlerLists) {
+                if (!handlerList.isValid(io)) continue;
+                this.addHandlerList(handlerList);
+                traitSubscriptions.add(handlerList.subscribe(recipeLogic::updateTickSubscription));
+            }
+        }
+
+        // Extract requested capabilities from base Multiblocks
+        var capabilitiesToExtract = new ArrayList<IoRecipeCapability>();
+        addCapabilitiesFromBase(capabilitiesToExtract);
+        addBaseCapabilities(capabilitiesToExtract);
+    }
+
 
     /**
      * This method is called when the module is added to a multiblock.
@@ -74,7 +215,7 @@ public class WorkableMultiblockMachineModule extends WorkableMultiblockMachine i
     public void addCapabilitiesFromBase(List<IoRecipeCapability> capabilitiesToExtract) {}
 
     private void addBaseCapabilities(List<IoRecipeCapability> capabilitiesToExtract) {
-        for (IModularMultiblock base : getBaseMultiBlocks()) {
+        for (IModularMultiblock base : getBases()) {
             for (var ioCap : capabilitiesToExtract) {
                 if (ioCap.io == IO.BOTH) {
                     addBaseIORecipeCapability(base, IO.IN, ioCap.cap);
@@ -102,121 +243,7 @@ public class WorkableMultiblockMachineModule extends WorkableMultiblockMachine i
         }
     }
 
-    public void setBaseMultiblocks(List<BlockPos> posList) {
-        baseMultiblockResolved = true;
-        var level = getLevel();
-        if (level == null || posList.isEmpty()) baseMultiblocks.clear();
-        else {
-            baseMultiblockPoss.clear();
-            baseMultiblocks.clear();
-            for (var pos : posList) {
-                if (MetaMachine.getMachine(level, pos) instanceof IModularMultiblock machine) {
-                    machine.addModule(this);
-                    baseMultiblockPoss.add(pos);
-                    baseMultiblocks.add(machine);
-                }
-            }
-        }
-    }
 
-    public List<IModularMultiblock> getBaseMultiBlocks() {
-        if (!baseMultiblockResolved) setBaseMultiblocks(new ArrayList<>(baseMultiblockPoss));
-        return new ArrayList<>(baseMultiblocks);
-    }
-
-    @Override
-    public void onStructureFormed() {
-        super.onStructureFormed();
-
-        Map<Long, IO> ioMap = getMultiblockState().getMatchContext().getOrCreate("ioMap", Long2ObjectMaps::emptyMap);
-        var poss = new ArrayList<BlockPos>();
-        for (IMultiPart part : getParts()) {
-            if (part instanceof ModuleConnectorPartMachine) {
-                for (var controller : part.getControllers()) {
-                    if (controller instanceof IModularMultiblock master) {
-                        poss.add(master.getPos());
-                    }
-                }
-            }
-        }
-
-        setBaseMultiblocks(poss);
-        this.basesFormed = getBaseMultiBlocks().stream().allMatch(IModularMultiblock::isFormed);
-
-        updateTraitSubscriptions();
-
-        notifyBases();
-    }
-
-    private void updateTraitSubscriptions() {
-        Map<Long, IO> ioMap = getMultiblockState().getMatchContext().getOrCreate("ioMap", Long2ObjectMaps::emptyMap);
-
-        traitSubscriptions.forEach(ISubscription::unsubscribe);
-        traitSubscriptions.clear();
-
-        for (IMultiPart part : getParts()) {
-            IO io = ioMap.getOrDefault(part.self().getPos().asLong(), IO.BOTH);
-            if (io == IO.NONE) continue;
-
-            var handlerLists = part.getRecipeHandlers();
-            for (var handlerList : handlerLists) {
-                if (!handlerList.isValid(io)) continue;
-                this.addHandlerList(handlerList);
-                traitSubscriptions.add(handlerList.subscribe(recipeLogic::updateTickSubscription));
-            }
-        }
-
-        // Extract requested capabilities from base Multiblocks
-        var capabilitiesToExtract = new ArrayList<IoRecipeCapability>();
-        addCapabilitiesFromBase(capabilitiesToExtract);
-        addBaseCapabilities(capabilitiesToExtract);
-    }
-
-    @Override
-    public void onStructureInvalid() {
-        super.onStructureInvalid();
-        var bases = getBaseMultiBlocks();
-        if (!bases.isEmpty()) {
-            for (var base : bases) {
-                base.removeModule(this);
-            }
-        }
-        this.baseMultiblockPoss.clear();
-        this.baseMultiblocks.clear();
-    }
-
-    @Override
-    public void onBaseFormed() {
-        System.out.println("ModuleTest: Base formed notification received. IsClient: " + getLevel().isClientSide);
-        this.basesFormed = getBaseMultiBlocks().stream().allMatch(IModularMultiblock::isFormed);
-        updateTraitSubscriptions();
-        this.recipeLogic.resetRecipeLogic();
-    }
-
-    @Override
-    public void onBaseInvalid() {
-        this.basesFormed = false;
-        updateActiveBlocks(false);
-        activeBlocks = null;
-        capabilitiesProxy.clear();
-        capabilitiesFlat.clear();
-        traitSubscriptions.forEach(ISubscription::unsubscribe);
-        traitSubscriptions.clear();
-        recipeLogic.resetRecipeLogic();
-    }
-
-    @Override
-    public void onBaseUpdate() {
-        updateWorkingStatus();
-        System.out.println("ModuleTest: Update notification received. IsClient: " + getLevel().isClientSide);
-    }
-
-    @Override
-    public void notifyBases() {
-        for (IModularMultiblock base : getBaseMultiBlocks()) {
-            base.onModuleUpdate();
-        }
-    }
 
     @Override
     public void setWorkingEnabled(boolean isWorkingAllowed) {
@@ -225,7 +252,7 @@ public class WorkableMultiblockMachineModule extends WorkableMultiblockMachine i
     }
 
     private void updateWorkingStatus() {
-        this.areBasesWorking = getBaseMultiBlocks().stream()
+        this.areBasesWorking = getBases().stream()
                 .allMatch(IModularMultiblock::isWorking);
         getRecipeLogic().setWorkingEnabled(this.areBasesWorking);
     }

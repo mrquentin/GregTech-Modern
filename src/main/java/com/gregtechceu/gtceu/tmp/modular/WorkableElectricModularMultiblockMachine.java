@@ -43,20 +43,19 @@ public class WorkableElectricModularMultiblockMachine extends WorkableModularMul
     //////////////////////////////////////
     // *** Multiblock Lifecycle ***//
     //////////////////////////////////////
+    ///
     @Override
-    public void onStructureInvalid() {
-        super.onStructureInvalid();
-        this.energyContainer = null;
-        this.tier = 0;
-        notifyModules();
+    public void onBaseStructureFormed() {
+        super.onBaseStructureFormed();
+        this.energyContainer = getEnergyContainer();
+        this.tier = GTUtil.getFloorTierByVoltage(getMaxVoltage());
     }
 
     @Override
-    public void onStructureFormed() {
-        super.onStructureFormed();
-        this.energyContainer = getEnergyContainer();
-        this.tier = GTUtil.getFloorTierByVoltage(getMaxVoltage());
-        notifyModules();
+    public void onBaseStructureInvalid() {
+        super.onBaseStructureInvalid();
+        this.energyContainer = null;
+        this.tier = 0;
     }
 
     @Override
@@ -64,7 +63,6 @@ public class WorkableElectricModularMultiblockMachine extends WorkableModularMul
         super.onPartUnload();
         this.energyContainer = null;
         this.tier = 0;
-        notifyModules();
     }
 
     //////////////////////////////////////

@@ -17,7 +17,7 @@ public class OrbitalForgeModule extends WorkableElectricMultiblockMachineModule 
 
     @Override
     public int getCoilTier() {
-        for (var base : getBaseMultiBlocks()) {
+        for (var base : getBases()) {
             if (base instanceof OrbitalForgeModularMultiblockMachine orbital) {
                 return orbital.getCoilTier();
             }
@@ -26,7 +26,7 @@ public class OrbitalForgeModule extends WorkableElectricMultiblockMachineModule 
     }
 
     public ICoilType getCoilType() {
-        for (var base : getBaseMultiBlocks()) {
+        for (var base : getBases()) {
             if (base instanceof OrbitalForgeModularMultiblockMachine orbital) {
                 return orbital.getCoilType();
             }

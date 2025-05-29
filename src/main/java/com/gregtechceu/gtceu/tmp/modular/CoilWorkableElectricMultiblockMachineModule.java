@@ -24,8 +24,8 @@ public class CoilWorkableElectricMultiblockMachineModule extends WorkableElectri
     // *** Multiblock LifeCycle ***//
     //////////////////////////////////////
     @Override
-    public void onStructureFormed() {
-        super.onStructureFormed();
+    public void onModuleStructureFormed() {
+        super.onModuleStructureFormed();
         var type = getMultiblockState().getMatchContext().get("CoilType");
         if (type instanceof ICoilType coil) {
             this.coilType = coil;
