@@ -18,14 +18,8 @@ import com.gregtechceu.gtceu.client.util.TooltipHelper;
 import com.gregtechceu.gtceu.common.data.GTMachines;
 import com.gregtechceu.gtceu.common.data.GTMaterials;
 import com.gregtechceu.gtceu.common.data.GTRecipeTypes;
-import com.gregtechceu.gtceu.common.machine.multiblock.electric.research.DataBankMachine;
-import com.gregtechceu.gtceu.common.machine.multiblock.electric.research.HPCAMachine;
-import com.gregtechceu.gtceu.common.machine.multiblock.electric.research.NetworkSwitchMachine;
-import com.gregtechceu.gtceu.common.machine.multiblock.electric.research.ResearchStationMachine;
-import com.gregtechceu.gtceu.common.machine.multiblock.part.DataAccessHatchMachine;
-import com.gregtechceu.gtceu.common.machine.multiblock.part.ObjectHolderMachine;
-import com.gregtechceu.gtceu.common.machine.multiblock.part.OpticalComputationHatchMachine;
-import com.gregtechceu.gtceu.common.machine.multiblock.part.OpticalDataHatchMachine;
+import com.gregtechceu.gtceu.common.machine.multiblock.electric.research.*;
+import com.gregtechceu.gtceu.common.machine.multiblock.part.*;
 import com.gregtechceu.gtceu.common.machine.multiblock.part.hpca.*;
 import com.gregtechceu.gtceu.config.ConfigHolder;
 import com.gregtechceu.gtceu.data.lang.LangHandler;
@@ -293,9 +287,38 @@ public class GTResearchMachines {
                     GTCEu.id("block/multiblock/hpca"))
             .register();
 
+    public static final MultiblockMachineDefinition WIRELESS_CWU_TRANSMITTER = REGISTRATE
+            .multiblock("wireless_cwu_transmitter", WirelessComputationTransmitter::new)
+            .langValue("Wireless Computation Transmitter")
+            .rotationState(RotationState.NON_Y_AXIS)
+            .appearanceBlock(HIGH_POWER_CASING)
+            .recipeType(GTRecipeTypes.DUMMY_RECIPES)
+            .pattern(definition -> FactoryBlockPattern.start()
+                    .aisle("AAA", "RAR", "AAA")
+                    .aisle("AAA", "A A", "AIA")
+                    .aisle("AMA", "ACA", "AAA")
+                    .where("C", controller(blocks(definition.getBlock())))
+                    .where("I", abilities(PartAbility.INPUT_ENERGY))
+                    .where("M", abilities(PartAbility.MAINTENANCE))
+                    .where("R", abilities(PartAbility.COMPUTATION_DATA_RECEPTION))
+                    .where("A", blocks(HIGH_POWER_CASING.get()))
+                    .build())
+            .workableCasingModel(GTCEu.id("block/casings/hpca/high_power_casing"),
+                    GTCEu.id("block/multiblock/wireless_data_transmitter"))
+            .register();
+
     ////////////////////////////////////////////
     // ******** MULTIBLOCK PARTS ********//
     ////////////////////////////////////////////
+
+    public static final MachineDefinition WIRELESS_CWU_HATCH = REGISTRATE
+            .machine("wireless_cwu_hatch", WirelessComputationReceiverHatchPartMachine::new)
+            .langValue("Wireless Computation Receiver Hatch")
+            .rotationState(RotationState.ALL)
+            .abilities(PartAbility.COMPUTATION_DATA_RECEPTION)
+            .tier(UEV)
+            .overlayTieredHullModel("wireless_data_hatch")
+            .register();
 
     public static final MachineDefinition COMPUTATION_HATCH_TRANSMITTER = registerDataHatch(
             "computation_transmitter_hatch", "Computation Data Transmission Hatch",
